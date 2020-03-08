@@ -170,4 +170,7 @@ config TAS2557_MISC_STEREO
 	bool "Misc Driver support"
 endif # SND_SOC_TAS2557_STEREO
 
+config SND_SOC_USB_HEADSET
+	tristate "Xiaomi USB analog headset driver"
+
 endmenu
