@@ -440,4 +440,10 @@ config MACH_XIAOMI_CLOVER
 	help
 	  This enables support for Xiaomi Mi Pad 4 Family
 
+config MACH_XIAOMI_PLATINA
+	bool "Xiaomi platina board"
+	select MACH_XIAOMI
+	help
+	  Support for Xiaomi Mi 8 Lite
+
 endmenu

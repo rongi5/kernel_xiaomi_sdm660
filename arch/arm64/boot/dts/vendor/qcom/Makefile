@@ -314,6 +314,9 @@ sda660-rcm-external-codec-overlay.dtbo-base := sda660-pm660l.dtb
 endif
 ifeq ($(CONFIG_MACH_XIAOMI),y)
 dtb-$(CONFIG_MACH_XIAOMI_CLOVER) := sdm660-mtp-clover.dtb
+endif
+ifeq ($(CONFIG_MACH_XIAOMI),y)
+dtb-$(CONFIG_MACH_XIAOMI_PLATINA) := sdm660-mtp-platina.dtb
 else
 dtb-$(CONFIG_ARCH_SDM660) += sdm660-sim.dtb \
 sdm660-internal-codec-cdp.dtb \
