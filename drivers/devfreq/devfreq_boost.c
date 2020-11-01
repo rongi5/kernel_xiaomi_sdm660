@@ -5,6 +5,7 @@
 
 #define pr_fmt(fmt) "devfreq_boost: " fmt
 
+#include <linux/battery_saver.h>
 #include <linux/devfreq_boost.h>
 #include <linux/fb.h>
 #include <linux/input.h>
@@ -60,7 +61,7 @@ static void __devfreq_boost_kick(struct boost_dev *b)
 {
 	unsigned int period;
 
-	if (!READ_ONCE(b->df) || test_bit(SCREEN_OFF, &b->state) || kp_active_mode() == 1)
+	if (!READ_ONCE(b->df) || test_bit(SCREEN_OFF, &b->state) || kp_active_mode() == 1 || is_battery_saver_on())
 		return;
 
 	period = (kp_active_mode() == 2) ? (CONFIG_DEVFREQ_INPUT_BOOST_DURATION_MS * 1.5) :
@@ -88,7 +89,7 @@ static void __devfreq_boost_kick_max(struct boost_dev *b,
 {
 	unsigned long boost_jiffies, curr_expires, new_expires;
 
-	if (!READ_ONCE(b->df) || test_bit(SCREEN_OFF, &b->state) || kp_active_mode() == 1)
+	if (!READ_ONCE(b->df) || test_bit(SCREEN_OFF, &b->state) || kp_active_mode() == 1 || is_battery_saver_on())
 		return;
 
 	boost_jiffies = msecs_to_jiffies(duration_ms);
