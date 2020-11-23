@@ -172,5 +172,8 @@ endif # SND_SOC_TAS2557_STEREO
 
 config SND_SOC_USB_HEADSET
 	tristate "Xiaomi USB analog headset driver"
+config SND_SOC_TFA9894
+	tristate "NXP Semiconductors TFA9894 amplifier"
+	depends on I2C
 
 endmenu
