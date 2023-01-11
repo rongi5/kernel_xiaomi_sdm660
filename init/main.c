@@ -556,10 +556,18 @@ static void __init mm_init(void)
 	pti_init();
 }
 
+#ifdef CONFIG_MACH_XIAOMI_PLATINA
+int fpsensor = 1;
+bool is_poweroff_charge = false;
+#endif
+
 asmlinkage __visible void __init start_kernel(void)
 {
 	char *command_line;
 	char *after_dashes;
+#ifdef CONFIG_MACH_XIAOMI_PLATINA
+	char *p = NULL;
+#endif
 
 	set_task_stack_end_magic(&init_task);
 	smp_setup_processor_id();
@@ -591,6 +599,20 @@ asmlinkage __visible void __init start_kernel(void)
 	pr_notice("Kernel command line: %s\n", boot_command_line);
 	/* parameters may set static keys */
 	jump_label_init();
+
+#ifdef CONFIG_MACH_XIAOMI_PLATINA
+	p = NULL;
+	p = strstr(boot_command_line, "androidboot.fpsensor=fpc");
+	if (p)
+		fpsensor = 1;
+	else
+		fpsensor = 2;
+	p = NULL;
+	p = strstr(boot_command_line, "androidboot.mode=charger");
+	if (p)
+		is_poweroff_charge = true;
+#endif
+
 	parse_early_param();
 	after_dashes = parse_args("Booting kernel",
 				  static_command_line, __start___param,
