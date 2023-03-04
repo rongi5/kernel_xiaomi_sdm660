@@ -378,23 +378,3 @@
 		qcom,clock-rates = <24000000 0>;
 	};
 };
-
-&pm660l_gpios {
-	cam_sensor_eldo3 {
-		cam_sensor_eldo3_default: cam_sensor_eldo3_default {
-			pins = "gpio3";
-			function = "normal";
-			output-high;
-			bias-disable;
-		};
-	};
-
-	cam_sensor_eldo4 {
-		cam_sensor_eldo4_default: cam_sensor_eldo4_default {
-			pins = "gpio4";
-			function = "normal";
-			output-low;
-			bias-disable;
-		};
-	};
-};
