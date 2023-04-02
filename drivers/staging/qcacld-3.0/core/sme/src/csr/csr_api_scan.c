@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2011-2020 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -58,7 +57,7 @@ static void csr_set_cfg_valid_channel_list(struct mac_context *mac,
 
 static void csr_save_tx_power_to_cfg(struct mac_context *mac,
 				     tDblLinkList *pList,
-				     enum band_info band);
+				     uint32_t cfgId);
 
 static void csr_set_cfg_country_code(struct mac_context *mac,
 				     uint8_t *countryCode);
@@ -3092,7 +3091,8 @@ void csr_init_occupied_channels_list(struct mac_context *mac_ctx,
 	qdf_list_node_t *next_lst = NULL;
 	struct scan_cache_node *cur_node = NULL;
 	struct scan_filter *filter;
-	tpCsrNeighborRoamControlInfo neighbor_roam_info;
+	tpCsrNeighborRoamControlInfo neighbor_roam_info =
+		&mac_ctx->roam.neighborRoamInfo[sessionId];
 	tCsrRoamConnectedProfile *profile = NULL;
 	uint8_t ch;
 
@@ -3101,8 +3101,6 @@ void csr_init_occupied_channels_list(struct mac_context *mac_ctx,
 		sme_debug("Invalid session");
 		return;
 	}
-	neighbor_roam_info = &mac_ctx->roam.neighborRoamInfo[sessionId];
-
 	if (neighbor_roam_info->cfgParams.specific_chan_info.numOfChannels) {
 		/*
 		 * Ini file contains neighbor scan channel list, hence NO need

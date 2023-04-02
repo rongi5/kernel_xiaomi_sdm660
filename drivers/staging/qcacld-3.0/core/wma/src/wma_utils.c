@@ -797,6 +797,7 @@ int wma_profile_data_report_event_handler(void *handle, uint8_t *event_buf,
 	wmi_wlan_profile_t *profile_data;
 	uint32_t i = 0;
 	uint32_t entries;
+	uint8_t *buf_ptr;
 	char temp_str[150];
 
 	param_buf = (WMI_WLAN_PROFILE_DATA_EVENTID_param_tlvs *) event_buf;
@@ -804,9 +805,12 @@ int wma_profile_data_report_event_handler(void *handle, uint8_t *event_buf,
 		WMA_LOGE("%s: Invalid profile data event buf", __func__);
 		return -EINVAL;
 	}
-
 	profile_ctx = param_buf->profile_ctx;
+	buf_ptr = (uint8_t *)profile_ctx;
+	buf_ptr = buf_ptr + sizeof(wmi_wlan_profile_ctx_t) + WMI_TLV_HDR_SIZE;
+	profile_data = (wmi_wlan_profile_t *) buf_ptr;
 	entries = profile_ctx->bin_count;
+
 	if (entries > param_buf->num_profile_data) {
 		WMA_LOGE("FW bin count %d more than data %d in TLV hdr",
 			 entries,
@@ -835,7 +839,6 @@ int wma_profile_data_report_event_handler(void *handle, uint8_t *event_buf,
 	QDF_TRACE(QDF_MODULE_ID_WMA, QDF_TRACE_LEVEL_ERROR,
 		  "Profile ID: Count: TOT: Min: Max: hist_intvl: hist[0]: hist[1]:hist[2]");
 
-	profile_data = param_buf->profile_data;
 	for (i = 0; i < entries; i++) {
 		if (i == WMI_WLAN_PROFILE_MAX_BIN_CNT)
 			break;
@@ -1112,9 +1115,9 @@ wma_fill_tx_stats(struct sir_wifi_ll_ext_stats *ll_stats,
 	struct sir_wifi_tx *tx_stats;
 	struct sir_wifi_ll_ext_peer_stats *peer_stats;
 	uint32_t *tx_mpdu_aggr, *tx_succ_mcs, *tx_fail_mcs, *tx_delay;
-	uint32_t len, dst_len, param_len, num_entries,
-		 tx_mpdu_aggr_array_len, tx_succ_mcs_array_len,
-		 tx_fail_mcs_array_len, tx_delay_array_len;
+	uint32_t len, dst_len, param_len, tx_mpdu_aggr_array_len,
+		 tx_succ_mcs_array_len, tx_fail_mcs_array_len,
+		 tx_delay_array_len;
 
 	result = *buf;
 	dst_len = *buf_length;
@@ -1190,12 +1193,6 @@ wma_fill_tx_stats(struct sir_wifi_ll_ext_stats *ll_stats,
 	if (!wmi_peer_tx || !wmi_tx || !peer_stats) {
 		WMA_LOGE(FL("Invalid arg, peer_tx %pK, wmi_tx %pK stats %pK"),
 			 wmi_peer_tx, wmi_tx, peer_stats);
-		return QDF_STATUS_E_FAILURE;
-	}
-
-	num_entries = fix_param->num_peer_ac_tx_stats * WLAN_MAX_AC;
-	if (num_entries > param_buf->num_tx_stats) {
-		wma_err("tx stats invalid arg, %d", num_entries);
 		return QDF_STATUS_E_FAILURE;
 	}
 
@@ -3997,42 +3994,12 @@ WLAN_PHY_MODE wma_peer_phymode(tSirNwType nw_type, uint8_t sta_type,
 			phymode = MODE_11G;
 			break;
 		}
-		if (CH_WIDTH_40MHZ < ch_width)
-			WMA_LOGE("80/160 MHz BW sent in 11G, configured 40MHz");
-		if (ch_width)
-			phymode = (is_he) ? MODE_11AX_HE40_2G : (is_vht) ?
-					MODE_11AC_VHT40_2G : MODE_11NG_HT40;
-		else
-			phymode = (is_he) ? MODE_11AX_HE20_2G : (is_vht) ?
-					MODE_11AC_VHT20_2G : MODE_11NG_HT20;
 		break;
 	case eSIR_11A_NW_TYPE:
 		if (!(is_ht || is_vht || is_he)) {
 			phymode = MODE_11A;
 			break;
 		}
-		if (is_he) {
-			if (ch_width == CH_WIDTH_160MHZ)
-				phymode = MODE_11AX_HE160;
-			else if (ch_width == CH_WIDTH_80P80MHZ)
-				phymode = MODE_11AX_HE80_80;
-			else if (ch_width == CH_WIDTH_80MHZ)
-				phymode = MODE_11AX_HE80;
-			else
-				phymode = (ch_width) ?
-					  MODE_11AX_HE40 : MODE_11AX_HE20;
-		} else if (is_vht) {
-			if (ch_width == CH_WIDTH_160MHZ)
-				phymode = MODE_11AC_VHT160;
-			else if (ch_width == CH_WIDTH_80P80MHZ)
-				phymode = MODE_11AC_VHT80_80;
-			else if (ch_width == CH_WIDTH_80MHZ)
-				phymode = MODE_11AC_VHT80;
-			else
-				phymode = (ch_width) ?
-					  MODE_11AC_VHT40 : MODE_11AC_VHT20;
-		} else
-			phymode = (ch_width) ? MODE_11NA_HT40 : MODE_11NA_HT20;
 		break;
 	default:
 		WMA_LOGE("%s: Invalid nw type %d", __func__, nw_type);

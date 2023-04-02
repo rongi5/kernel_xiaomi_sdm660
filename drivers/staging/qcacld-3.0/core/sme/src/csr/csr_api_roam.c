@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -6954,9 +6953,7 @@ static void csr_roam_process_start_bss_success(struct mac_context *mac_ctx,
 	tDot11fBeaconIEs *ies_ptr = NULL;
 	tSirMacAddr bcast_mac = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 	QDF_STATUS status;
-#ifdef FEATURE_WLAN_DIAG_SUPPORT_CSR
 	host_log_ibss_pkt_type *ibss_log;
-#endif
 #ifdef FEATURE_WLAN_MCC_TO_SCC_SWITCH
 	struct ht_profile *src_profile = NULL;
 	tCsrRoamHTProfile *dst_profile = NULL;
@@ -7058,8 +7055,8 @@ static void csr_roam_process_start_bss_success(struct mac_context *mac_ctx,
 			ibss_log->beaconInterval = (uint8_t) bi;
 		WLAN_HOST_DIAG_LOG_REPORT(ibss_log);
 	}
-	ibss_log = NULL;
 #endif
+	ibss_log = NULL;
 	/*
 	 * Only set context for non-WDS_STA. We don't even need it for
 	 * WDS_AP. But since the encryption.
@@ -7768,9 +7765,7 @@ static bool csr_roam_process_results(struct mac_context *mac_ctx, tSmeCmd *cmd,
 	struct csr_roam_profile *profile = &cmd->u.roamCmd.roamProfile;
 	eRoamCmdStatus roam_status;
 	eCsrRoamResult roam_result;
-#ifdef FEATURE_WLAN_DIAG_SUPPORT_CSR
 	host_log_ibss_pkt_type *ibss_log;
-#endif
 	struct start_bss_rsp  *start_bss_rsp = NULL;
 
 	if (!session) {
@@ -7799,8 +7794,8 @@ static bool csr_roam_process_results(struct mac_context *mac_ctx, tSmeCmd *cmd,
 			ibss_log->status = WLAN_IBSS_STATUS_FAILURE;
 			WLAN_HOST_DIAG_LOG_REPORT(ibss_log);
 		}
-		ibss_log = NULL;
 #endif
+		ibss_log = NULL;
 		start_bss_rsp = (struct start_bss_rsp *)context;
 		roam_status = eCSR_ROAM_IBSS_IND;
 		roam_result = eCSR_ROAM_RESULT_IBSS_STARTED;
@@ -8716,12 +8711,6 @@ csr_roam_reassoc(struct mac_context *mac_ctx, uint32_t session_id,
 		sme_err("No profile specified");
 		return QDF_STATUS_E_FAILURE;
 	}
-
-	if (!session) {
-		sme_err("Session_id invalid %d", session_id);
-		return QDF_STATUS_E_FAILURE;
-	}
-
 	sme_debug(
 		"called  BSSType = %s (%d) authtype = %d  encryType = %d",
 		sme_bss_type_to_string(profile->BSSType),
@@ -13590,20 +13579,16 @@ static QDF_STATUS csr_roam_start_wait_for_key_timer(
 {
 	QDF_STATUS status;
 	uint8_t session_id = mac->roam.WaitForKeyTimerInfo.vdev_id;
-#ifdef WLAN_DEBUG
 	tpCsrNeighborRoamControlInfo pNeighborRoamInfo =
 		&mac->roam.neighborRoamInfo[session_id];
-#endif
 
 	if (csr_neighbor_roam_is_handoff_in_progress(mac, session_id)) {
 		/* Disable heartbeat timer when hand-off is in progress */
-#ifdef WLAN_DEBUG
 		sme_debug("disabling HB timer in state: %s sub-state: %s",
 			mac_trace_get_neighbour_roam_state(
 				pNeighborRoamInfo->neighborRoamState),
 			mac_trace_getcsr_roam_sub_state(
 				mac->roam.curSubState[session_id]));
-#endif
 		mac->mlme_cfg->timeouts.heart_beat_threshold = 0;
 	}
 	sme_debug("csrScanStartWaitForKeyTimer");
@@ -17680,11 +17665,6 @@ QDF_STATUS csr_send_mb_set_context_req_msg(struct mac_context *mac,
 	QDF_STATUS status = QDF_STATUS_E_FAILURE;
 	struct csr_roam_session *pSession = CSR_GET_SESSION(mac, sessionId);
 
-	if (!pSession) {
-		sme_err("Session_id invalid %d", sessionId);
-		return status;
-	}
-
 	sme_debug("keylength: %d Encry type: %d", keyLength, edType);
 	do {
 		if ((1 != numKeys) && (0 != numKeys))
@@ -18393,10 +18373,6 @@ void csr_cleanup_session(struct mac_context *mac, uint32_t sessionId)
 		struct csr_roam_session *pSession = CSR_GET_SESSION(mac,
 								sessionId);
 
-		if (!pSession) {
-			sme_err("Session_ID Invalid %d", sessionId);
-			return;
-		}
 		csr_roam_stop(mac, sessionId);
 
 		/* Clean up FT related data structures */
@@ -22646,11 +22622,6 @@ static bool csr_is_conn_allow_2g_band(struct mac_context *mac_ctx, uint32_t chnl
 	sap_session_id = csr_find_session_by_type(mac_ctx, QDF_SAP_MODE);
 	if (WLAN_UMAC_VDEV_ID_MAX != sap_session_id) {
 		sap_session = CSR_GET_SESSION(mac_ctx, sap_session_id);
-		if (!sap_session) {
-			sme_err("Session_id invalid %d", sap_session_id);
-			return false;
-		}
-
 		if ((0 != sap_session->bssParams.operationChn) &&
 				(sap_session->bssParams.operationChn != chnl)) {
 
@@ -22689,11 +22660,6 @@ static bool csr_is_conn_allow_5g_band(struct mac_context *mac_ctx, uint32_t chnl
 	p2pgo_session_id = csr_find_session_by_type(mac_ctx, QDF_P2P_GO_MODE);
 	if (WLAN_UMAC_VDEV_ID_MAX != p2pgo_session_id) {
 		p2pgo_session = CSR_GET_SESSION(mac_ctx, p2pgo_session_id);
-		if (!p2pgo_session) {
-			sme_err("Session_id invalid %d", p2pgo_session_id);
-			return false;
-		}
-
 		if ((0 != p2pgo_session->bssParams.operationChn) &&
 				(eCSR_ASSOC_STATE_TYPE_NOT_CONNECTED !=
 				 p2pgo_session->connectState) &&
