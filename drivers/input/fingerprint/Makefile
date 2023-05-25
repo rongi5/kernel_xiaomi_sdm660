@@ -1,1 +1,2 @@
 obj-$(CONFIG_FINGERPRINT_FPC1020)	+= fpc/
+obj-$(CONFIG_FPC_FINGERPRINT_MI)	+= fpc_mi/
