@@ -9,3 +9,4 @@ config INPUT_FINGERPRINT
 
 source "drivers/input/fingerprint/fpc/Kconfig"
 source "drivers/input/fingerprint/fpc_mi/Kconfig"
+source "drivers/input/fingerprint/goodix_mi/Kconfig"
